@@ -7,9 +7,9 @@ router.post('/signup', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    const error = new Error('Custom message: Bad Request - Data is required');
+    const error = new Error('Email and password are required');
     error.status = 400;
-    return next(error);
+    throw error; 
   }
 
   try {
