@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors'); 
+const path = require("path");
 
 require("dotenv").config({ path: "./config/.env" });
 
@@ -20,6 +21,8 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use("/api/books", booksRoutes);
+
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use((error, req, res, next) => {
 	console.error("Error", error);

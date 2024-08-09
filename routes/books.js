@@ -11,3 +11,4 @@ const booksController = require('../controllers/books');
 module.exports = router;
 
 router.post("/", auth, multer, sharp, booksController.createBook);
+router.get("/", booksController.getAllBooks);

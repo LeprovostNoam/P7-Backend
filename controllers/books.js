@@ -6,7 +6,7 @@ const MIME_TYPES = {
     'image/jpeg': 'jpg',
     'image/webp': 'webp',
     'image/png': 'png',
-  };
+};
   
 exports.createBook = (req, res, next) => {
     try {
@@ -49,4 +49,16 @@ exports.createBook = (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+exports.getAllBooks = (req, res, next) => {
+	Book.find()
+		.then((books) => res.status(200).json(books))
+		.catch((error) => next(error));
+};
+
+exports.getOneBook = (req, res, next) => {
+	Book.findOne({ _id: req.params.id })
+		.then((books) => res.status(200).json(books))
+		.catch((error) => next(error));
 };
