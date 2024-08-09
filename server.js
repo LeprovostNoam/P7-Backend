@@ -7,7 +7,7 @@ const { connectToDatabase } = require('./config/db');
 const authRoutes = require('./routes/auth');
 
 const app = express();
-const port = 4000;
+
 
 app.use(cors({
     origin: '*',
@@ -19,6 +19,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 
+let port = process.env.PORT || '4000';
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
   connectToDatabase(); 
