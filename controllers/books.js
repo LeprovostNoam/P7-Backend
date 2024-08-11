@@ -122,6 +122,50 @@ exports.deleteBook = async (req, res, next) => {
 			res.status(200).json({ message: "Le livre à été supprimé avec succès." });
 		});
 	} catch (error) {
-		res.status(500).json({ error: error.message });
+		next(error);
+	}
+};
+
+exports.bestRatings = (req, res, next) => {
+	Book.find()
+		.sort({ averageRating: "desc" })
+		.then((books) => res.status(200).json(books.splice(0, 3)))
+		.catch((error) => next(error));
+};
+
+exports.ratingBook = async (req, res) => {
+	const bookId = req.params.id;
+	const userId = req.auth.userId;
+	const rating = req.body.rating;
+
+	if (rating < 1 || rating > 5) {
+		return res.status(400).json({ error: "La note doit être comprise entre 1 et 5." });
+	}
+
+	try {
+		const updatedBook = await Book.findOneAndUpdate(
+			{ _id: bookId, "ratings.userId": { $ne: userId } },
+			{ $push: { ratings: { userId: userId, grade: rating } } },
+			{ new: true }
+		);
+
+		if (!updatedBook) {
+			return res.status(400).json({ error: "Vous avez a déjà noté ce livre." });
+		}
+
+		const totalRatings = updatedBook.ratings.length;
+		const totalRatingSum = updatedBook.ratings.reduce(
+			(sum, rating) => sum + rating.grade,
+			0
+		);
+		const newAverageRating = (totalRatingSum / totalRatings).toFixed(1);
+
+		updatedBook.averageRating = newAverageRating;
+
+		await updatedBook.save();
+
+		return res.json(updatedBook);
+	} catch (error) {
+		next(error);
 	}
 };
