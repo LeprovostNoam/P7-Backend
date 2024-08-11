@@ -62,3 +62,42 @@ exports.getOneBook = (req, res, next) => {
 		.then((books) => res.status(200).json(books))
 		.catch((error) => next(error));
 };
+
+exports.modifyBook = async (req, res, next) => {
+	try {
+		const book = await Book.findOne({ _id: req.params.id });
+
+		if (!book) {
+			return res.status(404).json({ message: "Aucun livre trouvé." });
+		}
+
+		if (book.userId != req.auth.userId) {
+			return res.status(403).json({ message: "Vous n'êtes pas autorisé à modifier ce livre." });
+		}
+
+		const bookObject = req.file
+			? {
+					...JSON.parse(req.body.book),
+					imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`,
+			  }
+			: { ...req.body };
+
+		delete bookObject._userId;
+
+		if (req.file) {
+			const oldFilename = book.imageUrl.split("/images/")[1];
+			fs.unlink(`images/${oldFilename}`, (err) => {
+				if (err) {
+					console.error("Erreur lors de la suppression de l'ancienne image :", err);
+				}
+			});
+		}
+
+		await Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id });
+
+		res.status(200).json({ message: "Livre modifié avec succès !" });
+	} catch (error) {
+		console.error("Erreur lors de la modification du livre :", error);
+		next(error);
+	}
+};
