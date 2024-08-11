@@ -14,3 +14,4 @@ router.post("/", auth, multer, sharp, booksController.createBook);
 router.get("/", booksController.getAllBooks);
 router.get("/:id", booksController.getOneBook);
 router.put("/:id", auth, multer, sharp, booksController.modifyBook);
+router.delete("/:id", auth, booksController.deleteBook);

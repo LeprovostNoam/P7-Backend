@@ -101,3 +101,27 @@ exports.modifyBook = async (req, res, next) => {
 		next(error);
 	}
 };
+
+exports.deleteBook = async (req, res, next) => {
+	try {
+		const book = await Book.findOne({ _id: req.params.id });
+		if (!book) {
+			return res.status(404).json({ message: "Livre non trouvé." });
+		}
+		if (book.userId.toString() !== req.auth.userId) {
+			return res.status(401).json({ message: "Vous n'avez pas la permission de supprimer ce livre." });
+		}
+
+		const filename = book.imageUrl.split("/images/")[1];
+		fs.unlink(`images/${filename}`, async (err) => {
+			if (err) {
+				return res.status(500).json({ error: err.message });
+			}
+
+			await Book.deleteOne({ _id: req.params.id });
+			res.status(200).json({ message: "Le livre à été supprimé avec succès." });
+		});
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
